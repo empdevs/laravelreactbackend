@@ -6,6 +6,7 @@ use App\Models\Contact;
 use Illuminate\Http\Request;
 use App\Models\ContactRole;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
@@ -38,7 +39,6 @@ class ContactController extends Controller
             ];
             array_push($arr_users, $user);
             $arr_role_user = [];
-            // var_dump($user);
         }
         return response()->json($arr_users);
             // return response()->json($data);
@@ -50,7 +50,7 @@ class ContactController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(){
-        
+
     }
 
     /**
@@ -62,15 +62,10 @@ class ContactController extends Controller
     public function store(Request $request, Contact $contact)//POST Method
     {
         $requests = $request->all();
-        
         $roles = $requests['roles'];
-        
-        // var_dump($requests,$roles);
-        
         $arr_role = [];
-
+        Log::info($requests);
         $contact->create($requests);
-
         for($i = 0; $i < count($roles); $i++){
             DB::table('contact_role')->insert([
                 "contact_id" => $request["id"],
@@ -78,8 +73,8 @@ class ContactController extends Controller
             ]);
         }
 
-        // return response()->json($requests);
-    
+        return response()->json($requests);
+
     }
 
     /**
@@ -103,7 +98,7 @@ class ContactController extends Controller
                 // var_dump($role_user);
                 array_push($arr_role_user,$role_user);
             }
-            
+
             $user = [
                 "id"=>$c->id,
                 "name"=>$c->name,
@@ -136,13 +131,9 @@ class ContactController extends Controller
     public function update(Request $request, $id)//PUT Method
     {
         $requests = $request->all();
-
         $roles = $requests["roles"];
-        
         $contact = Contact::find($id);
-        
         $contact->update($requests);
-
         DB::table('contact_role')->where('contact_id',$id)->delete();
 
         for($i = 0; $i < count($roles); $i++){
@@ -163,11 +154,8 @@ class ContactController extends Controller
     public function destroy($id)
     {
         DB::table("contact_role")->where("contact_id",$id)->delete();
-
         $contact = Contact::find($id);
-
         $contact->delete();
-
         return response()->json($contact);
     }
 }
